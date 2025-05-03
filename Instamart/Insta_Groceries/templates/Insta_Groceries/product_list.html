@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - Insta Groceries</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f7fff6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Enhanced Navigation Bar Styles */
+        .navbar {
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            overflow: hidden;
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 70px;
+        }
+
+        .navbar-brand {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            text-decoration: none;
+            padding: 14px 0;
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+        }
+        
+        .navbar-brand:before {
+            content: "🛒";
+            margin-right: 10px;
+            font-size: 24px;
+            filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+        }
+
+        .navbar-links {
+            display: flex;
+            height: 100%;
+        }
+
+        .navbar-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            height: 100%;
+            position: relative;
+            transition: all 0.3s;
+            letter-spacing: 0.5px;
+        }
+
+        .navbar-links a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #8eff8e;
+        }
+        
+        .navbar-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: #8eff8e;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        
+        .navbar-links a:hover::after {
+            width: 70%;
+        }
+
+        /* Main content layout */
+        .main-container {
+            display: flex;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            min-width: 250px;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            margin-right: 20px;
+            height: fit-content;
+            position: sticky;
+            top: 90px; /* Give some space below navbar */
+        }
+
+        .sidebar h2 {
+            color: #2e7d32;
+            padding-bottom: 10px;
+            margin-top: 0;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .categories-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .categories-list li {
+            margin-bottom: 8px;
+        }
+
+        .categories-list a {
+            display: block;
+            padding: 10px 15px;
+            text-decoration: none;
+            color: #333;
+            border-radius: 5px;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .categories-list a:hover {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-left-color: #a5d6a7;
+        }
+
+        .categories-list a.active {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            font-weight: 600;
+            border-left-color: #2e7d32;
+        }
+
+        /* Mobile sidebar toggle */
+        .sidebar-toggle {
+            display: none;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+        }
+
+        .sidebar-toggle:after {
+            content: "▼";
+            float: right;
+        }
+
+        /* Product Content Area */
+        .product-content-area {
+            flex: 1;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2e7d32;
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+
+        /* Current Category Indicator */
+        .current-category {
+            margin-bottom: 20px;
+            background-color: #f0f8ff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border-left: 5px solid #2e7d32;
+        }
+
+        .current-category h3 {
+            margin: 0;
+            color: #2e7d32;
+        }
+
+        /* Cardboard Box Styled Product Cards */
+        .product-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 30px;
+            justify-content: flex-start;
+        }
+        
+        .product-card {
+            width: calc(33.333% - 20px);
+            max-width: 300px;
+            background-color: #e8d0a9;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s, box-shadow 0.3s;
+            flex: 0 0 auto;
+        }
+        
+        @media (max-width: 1100px) {
+            .product-card {
+                width: calc(50% - 20px);
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .product-card {
+                width: 100%;
+                max-width: none;
+            }
+        }
+        
+        /* Cardboard texture */
+        .product-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, 
+                rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent),
+                linear-gradient(135deg, #d9c097, #e8d0a9);
+            background-size: 20px 20px, 100% 100%;
+            z-index: -1;
+            opacity: 0.8;
+        }
+        
+        /* Box top flap */
+        .product-card::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 15px;
+            background-color: #d4bc91;
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+        }
+        
+        .product-content {
+            padding: 25px 15px 15px;
+            position: relative;
+        }
+        
+        /* Tape effect */
+        .product-content::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 15px;
+            background-color: rgba(173, 181, 189, 0.6);
+            z-index: 1;
+        }
+        
+        .product-card h3 {
+            color: #4e3114;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px dashed #c4a87a;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        
+        .product-details {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 5px 10px;
+            color: #5d4520;
+        }
+        
+        .product-label {
+            font-weight: bold;
+        }
+        
+        .product-category {
+            grid-column: span 2;
+            text-align: center;
+            margin-top: 10px;
+            background-color: #d4bc91;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 150px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            background-color: #f5f5f5;
+            position: relative;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+
+        .product-image.placeholder {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #e0e0e0;
+        }
+
+        .no-image {
+            font-size: 3rem;
+            color: #aaa;
+        }
+
+        /* No products message */
+        .no-products {
+            text-align: center;
+            margin-top: 50px;
+            color: #666;
+            font-size: 1.1rem;
+            padding: 40px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Responsive styles */
+        @media (max-width: 900px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 20px;
+                position: static;
+                padding: 0;
+                box-shadow: none;
+                background: transparent;
+            }
+
+            .sidebar-inner {
+                display: none;
+                padding: 15px;
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+
+            .sidebar.open .sidebar-inner {
+                display: block;
+            }
+
+            .sidebar.open .sidebar-toggle:after {
+                content: "▲";
+            }
+        }
+
+        /* Product action buttons */
+        .product-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .edit-btn {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background-color: #388e3c;
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .add-to-cart-btn {
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .add-to-cart-btn:hover {
+            background-color: #e68900;
+        }
+
+        .cart-icon {
+            margin-left: 5px;
+        }
+
+        /* Add to Cart Button Styles */
+        .add-to-cart-btn {
+            display: block;
+            width: 100%;
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            padding: 12px 0;
+            margin-top: 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .add-to-cart-btn:hover {
+            background-color: #1b5e20;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+
+        .add-to-cart-btn:active {
+            transform: translateY(0);
+        }
+
+        .cart-icon {
+            margin-left: 5px;
+            font-size: 0.9rem;
+        }
+
+        /* Buy Now Button Styles */
+        .buy-now-btn {
+            width: 100%;
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 12px 0;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        .buy-now-btn:hover {
+            background-color: #f57c00;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Cart notification */
+        .cart-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #333;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 6px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .cart-notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .notification-icon {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        /* Cart Dropdown Styles */
+        .navbar-cart {
+            position: relative;
+            cursor: pointer;
+            color: white;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            margin-left: 20px;
+        }
+
+        .cart-contents {
+            position: absolute;
+            top: 70px;  /* Increased from top: 100% to prevent it from being hidden */
+            right: 0;
+            width: 300px;
+            background-color: white;
+            color: #333;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 15px;
+            z-index: 1001;  /* Increased z-index to ensure it appears on top */
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .view-cart-btn {
+            display: block;
+            text-align: center;
+            background-color: #607d8b;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .view-cart-btn:hover {
+            background-color: #455a64;
+        }
+    </style>
+</head>
+<body>
+    <!-- Enhanced Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">Instamart</a>
+            <div class="navbar-links">
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'Insta_Groceries:product_list' %}">Products</a>
+                <a href="/admin">Admin</a>
+            </div>
+            <div class="navbar-cart" id="cart-icon">
+                🛒
+                <span class="cart-count">0</span>
+                
+                <!-- Cart Contents Dropdown -->
+                <div class="cart-contents" id="cart-contents">
+                    <h3>Your Cart</h3>
+                    <div id="cart-items">
+                        <!-- Cart items will be populated here -->
+                        <div class="empty-cart">Your cart is empty</div>
+                    </div>
+                    <div class="cart-total">
+                        <span>Total:</span>
+                        <span id="cart-total">₹0.00</span>
+                    </div>
+                    <a href="#" class="checkout-btn">Proceed to Checkout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Categories Sidebar -->
+        <aside class="sidebar">
+            <button class="sidebar-toggle">Browse Categories</button>
+            <div class="sidebar-inner">
+                <h2>Categories</h2>
+                <ul class="categories-list">
+                    <li>
+                        <a href="{% url 'Insta_Groceries:product_list' %}" 
+                           class="{% if not request.GET.category %}active{% endif %}">
+                            All Products
+                        </a>
+                    </li>
+                    {% for category in categories %}
+                        <li>
+                            <a href="{% url 'Insta_Groceries:product_list' %}?category={{ category.id }}"
+                               class="{% if request.GET.category|add:'0' == category.id %}active{% endif %}">
+                                {{ category.name }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Product Content Area -->
+
+        <div class="product-content-area">
+            <h1>Our Products</h1>
+            
+            <!-- Current Category Display -->
+            {% if current_category %}
+            <div class="current-category">
+                <h3>Currently browsing: {{ current_category.name }}</h3>
+            </div>
+            {% endif %}
+            
+            <!-- Product Display -->
+            {% if products %}
+                <div class="product-container">
+                    {% for product in products %}
+                    <div class="product-card">
+                        <div class="product-content">
+                            {% if product.image %}
+                                <div class="product-image">
+                                    <img src="{{ product.image.url }}" alt="{{ product.product_name }}">
+                                </div>
+                            {% else %}
+                                <div class="product-image placeholder">
+                                    <div class="no-image">🛒</div>
+                                </div>
+                            {% endif %}
+                            <h3>{{ product.product_name }}</h3>
+                            <div class="product-details">
+                                <div class="product-label">Price:</div>
+                                <div>₹{{ product.price }}</div>
+                                
+                                <div class="product-label">Stock:</div>
+                                <div>{{ product.stock }}</div>
+                                
+                                <div class="product-label">Description:</div>
+                                <div>{{ product.description|truncatechars:50 }}</div>
+                                
+                                {% if product.category %}
+                                <div class="product-category">{{ product.category.name }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Add product action buttons -->
+                            <div class="product-actions">
+                                <a href="{% url 'Insta_Groceries:edit_product' product.id %}" class="action-btn edit-btn">Edit</a>
+                                <a href="{% url 'Insta_Groceries:delete_product' product.id %}" class="action-btn delete-btn" onclick="return confirm('Are you sure you want to delete this product?')">Delete</a>
+                                <button class="buy-now-btn">Buy Now</button>
+                            </div>
+
+                            <!-- Add to Cart Button -->
+                            <button class="add-to-cart-btn" 
+                                    data-product-id="{{ product.id }}" 
+                                    data-product-name="{{ product.product_name }}" 
+                                    data-product-price="{{ product.price }}">
+                                Add to Cart <span class="cart-icon">🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-products">
+                    <p>No products available in this category.</p>
+                    <p>Please check other categories or come back later.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // JavaScript for mobile sidebar toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('open');
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Shopping Cart Functionality
+            let cart = JSON.parse(localStorage.getItem('instamart-cart')) || [];
+            const cartIcon = document.getElementById('cart-icon');
+            const cartContents = document.getElementById('cart-contents');
+            const cartCount = document.querySelector('.cart-count');
+            const addToCartBtn = document.querySelector('.add-to-cart-btn');
+            
+            // Update cart count
+            function updateCartCount() {
+                const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+                cartCount.textContent = totalItems;
+            }
+            
+            // Create notification
+            function showNotification(productName) {
+                // Remove any existing notification
+                const existingNotification = document.querySelector('.cart-notification');
+                if (existingNotification) {
+                    existingNotification.remove();
+                }
+                
+                // Create new notification
+                const notification = document.createElement('div');
+                notification.className = 'cart-notification';
+                notification.innerHTML = `
+                    <span class="notification-icon">✅</span>
+                    <span>${productName} added to cart</span>
+                `;
+                
+                // Add to document
+                document.body.appendChild(notification);
+                
+                // Show notification
+                setTimeout(() => notification.classList.add('show'), 10);
+                
+                // Hide notification after 3 seconds
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+            
+            // Add to cart functionality
+            if (addToCartBtn) {
+                addToCartBtn.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-product-id');
+                    const productName = this.getAttribute('data-product-name');
+                    const productPrice = parseFloat(this.getAttribute('data-product-price'));
+                    
+                    // Find if product already in cart
+                    const existingProduct = cart.find(item => item.id === productId);
+                    
+                    if (existingProduct) {
+                        existingProduct.quantity += 1;
+                    } else {
+                        cart.push({
+                            id: productId,
+                            name: productName,
+                            price: productPrice,
+                            quantity: 1
+                        });
+                    }
+                    
+                    // Save cart to localStorage
+                    localStorage.setItem('instamart-cart', JSON.stringify(cart));
+                    
+                    // Update UI
+                    updateCartCount();
+                    updateCartContents();
+                    
+                    // Show notification
+                    showNotification(productName);
+                });
+            }
+            
+            // Update cart contents
+            function updateCartContents() {
+                if (!cartContents) return;
+                
+                const cartItems = document.getElementById('cart-items');
+                if (!cartItems) return;
+                
+                if (cart.length === 0) {
+                    cartItems.innerHTML = '<div class="empty-cart">Your cart is empty</div>';
+                    document.getElementById('cart-total').textContent = '₹0.00';
+                    return;
+                }
+                
+                // Calculate total
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                
+                // Populate cart items
+                let html = '';
+                cart.forEach(item => {
+                    html += `
+                        <div class="cart-item">
+                            <div class="cart-item-details">
+                                <span class="cart-item-name">${item.name}</span>
+                                <span class="cart-item-price">₹${item.price}</span>
+                            </div>
+                            <div class="cart-item-quantity">
+                                <button class="quantity-btn minus" data-id="${item.id}">-</button>
+                                <span>${item.quantity}</span>
+                                <button class="quantity-btn plus" data-id="${item.id}">+</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                cartItems.innerHTML = html;
+                document.getElementById('cart-total').textContent = `₹${total.toFixed(2)}`;
+                
+                // Add event listeners for quantity buttons
+                document.querySelectorAll('.quantity-btn.minus').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const id = this.getAttribute('data-id');
+                        const item = cart.find(item => item.id === id);
+                        
+                        if (item.quantity > 1) {
+                            item.quantity -= 1;
+                        } else {
+                            cart = cart.filter(item => item.id !== id);
+                        }
+                        
+                        localStorage.setItem('instamart-cart', JSON.stringify(cart));
+                        updateCartCount();
+                        updateCartContents();
+                    });
+                });
+                
+                document.querySelectorAll('.quantity-btn.plus').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const id = this.getAttribute('data-id');
+                        const item = cart.find(item => item.id === id);
+                        item.quantity += 1;
+                        
+                        localStorage.setItem('instamart-cart', JSON.stringify(cart));
+                        updateCartCount();
+                        updateCartContents();
+                    });
+                });
+            }
+            
+            // Toggle cart display
+            if (cartIcon) {
+                cartIcon.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    cartContents.classList.toggle('show');
+                });
+            }
+            
+            // Close cart when clicking elsewhere
+            document.addEventListener('click', function(e) {
+                if (cartContents && !cartIcon.contains(e.target) && !cartContents.contains(e.target)) {
+                    cartContents.classList.remove('show');
+                }
+            });
+            
+            // Initialize cart count and contents
+            updateCartCount();
+            updateCartContents();
+        });
+    </script>
+</body>
+</html>

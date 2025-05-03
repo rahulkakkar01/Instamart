@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Product - Insta Groceries</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f7fff6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Enhanced Navigation Bar Styles */
+        .navbar {
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            overflow: hidden;
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 70px;
+        }
+
+        .navbar-brand {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            text-decoration: none;
+            padding: 14px 0;
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+        }
+        
+        .navbar-brand:before {
+            content: "🛒";
+            margin-right: 10px;
+            font-size: 24px;
+            filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+        }
+
+        .navbar-links {
+            display: flex;
+            height: 100%;
+        }
+
+        .navbar-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            height: 100%;
+            position: relative;
+            transition: all 0.3s;
+            letter-spacing: 0.5px;
+        }
+
+        /* Floating Veggie Emojis Styles */
+        .floating-veggies {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .veggie {
+            position: absolute;
+            font-size: 2.5rem;
+            opacity: 0.3;
+            animation: float 12s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Form Styles */
+        .content-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            color: #2e7d32;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2e7d32;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-hint {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #2e7d32;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1b5e20;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d0d0d0;
+        }
+
+        /* Product preview */
+        .product-preview {
+            background-color: #e8d0a9;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+            margin-top: 30px;
+            max-width: 280px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .preview-label {
+            background: #2e7d32;
+            color: white;
+            display: inline-block;
+            padding: 5px 15px;
+            position: absolute;
+            top: 10px;
+            right: 0;
+            font-size: 0.8rem;
+            border-radius: 4px 0 0 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        /* Cardboard texture for preview */
+        .product-preview::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, 
+                rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent),
+                linear-gradient(135deg, #d9c097, #e8d0a9);
+            background-size: 20px 20px, 100% 100%;
+            z-index: -1;
+            opacity: 0.8;
+        }
+        
+        /* Box top flap */
+        .product-preview::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 15px;
+            background-color: #d4bc91;
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+        }
+        
+        .preview-content {
+            padding: 25px 15px 15px;
+            position: relative;
+        }
+        
+        /* Tape effect */
+        .preview-content::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 15px;
+            background-color: rgba(173, 181, 189, 0.6);
+            z-index: 1;
+        }
+        
+        .product-preview h3 {
+            color: #4e3114;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px dashed #c4a87a;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        
+        .preview-details {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 5px 10px;
+            color: #5d4520;
+        }
+        
+        .preview-label-text {
+            font-weight: bold;
+        }
+        
+        .preview-category {
+            grid-column: span 2;
+            text-align: center;
+            margin-top: 10px;
+            background-color: #d4bc91;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #e0e0e0;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            color: #aaa;
+            font-size: 3rem;
+        }
+
+        /* Field validation */
+        .error-message {
+            color: #d32f2f;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .form-control.error {
+            border-color: #d32f2f;
+        }
+
+        .form-control.error + .error-message {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Enhanced Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">Instamart</a>
+            <div class="navbar-links">
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'Insta_Groceries:product_list' %}">Products</a>
+                {% if user.is_authenticated and user.is_staff %}
+                    <a href="{% url 'Insta_Groceries:add_product' %}" class="active-nav-link">
+                        <span class="nav-icon">+</span> Add Product
+                    </a>
+                    <a href="/admin">Admin</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Floating Veggie Emojis -->
+    <div class="floating-veggies">
+        <div class="veggie" style="left: 10%; animation-delay: 0s;">🍅</div>
+        <div class="veggie" style="left: 25%; animation-delay: 2s;">🥕</div>
+        <div class="veggie" style="left: 40%; animation-delay: 4s;">🥦</div>
+        <div class="veggie" style="left: 60%; animation-delay: 1s;">🧅</div>
+        <div class="veggie" style="left: 80%; animation-delay: 3s;">🌶</div>
+        <div class="veggie" style="left: 15%; animation-delay: 5s;">🍇</div>
+        <div class="veggie" style="left: 70%; animation-delay: 6s;">🍌</div>
+    </div>
+
+    <div class="content-container">
+        <div class="page-header">
+            <h1>Add New Product</h1>
+            <p>Fill in the details below to add a new product to our inventory</p>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.product_name.id_for_label }}">Product Name</label>
+                {{ form.product_name }}
+                <div class="error-message">Please enter a valid product name</div>
+                <span class="form-hint">Enter a descriptive name for the product</span>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.category.id_for_label }}">Category</label>
+                {{ form.category }}
+                <div class="error-message">Please select a category</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.description.id_for_label }}">Description</label>
+                {{ form.description }}
+                <div class="error-message">Please provide a product description</div>
+                <span class="form-hint">Include details about quality, usage, and benefits</span>
+            </div>
+            
+            <div class="form-row" style="display: flex; gap: 20px;">
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label" for="{{ form.price.id_for_label }}">Price (₹)</label>
+                    {{ form.price }}
+                    <div class="error-message">Please enter a valid price</div>
+                </div>
+                
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label" for="{{ form.stock.id_for_label }}">Available Stock</label>
+                    {{ form.stock }}
+                    <div class="error-message">Please enter the available quantity</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.image.id_for_label }}">Product Image</label>
+                {{ form.image }}
+                <div class="error-message">Please select a valid image file</div>
+                <span class="form-hint">Recommended size: 600x600px, Max size: 2MB</span>
+            </div>
+            
+            <!-- Product Preview -->
+            <div class="product-preview">
+                <div class="preview-label">Preview</div>
+                <div class="preview-content">
+                    <div class="preview-image">🛒</div>
+                    <h3 id="preview-name">Product Name</h3>
+                    <div class="preview-details">
+                        <div class="preview-label-text">Price:</div>
+                        <div id="preview-price">₹0.00</div>
+                        
+                        <div class="preview-label-text">Stock:</div>
+                        <div id="preview-stock">0</div>
+                        
+                        <div class="preview-label-text">Description:</div>
+                        <div id="preview-description">Product description will appear here...</div>
+                        
+                        <div id="preview-category" class="preview-category">Category</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <a href="{% url 'Insta_Groceries:product_list' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Add Product</button>
+            </div>
+        </form>
+    </div>
+    <script>
+        // Live preview functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const nameInput = document.getElementById('{{ form.product_name.id_for_label }}');
+            const priceInput = document.getElementById('{{ form.price.id_for_label }}');
+            const stockInput = document.getElementById('{{ form.stock.id_for_label }}');
+            const descriptionInput = document.getElementById('{{ form.description.id_for_label }}');
+            const categorySelect = document.getElementById('{{ form.category.id_for_label }}');
+            const imageInput = document.getElementById('{{ form.image.id_for_label }}');
+            
+            // Preview elements
+            const previewName = document.getElementById('preview-name');
+            const previewPrice = document.getElementById('preview-price');
+            const previewStock = document.getElementById('preview-stock');
+            const previewDescription = document.getElementById('preview-description');
+            const previewCategory = document.getElementById('preview-category');
+            const previewImage = document.querySelector('.preview-image');
+            
+            // Update preview on input change
+            nameInput.addEventListener('input', function() {
+                previewName.textContent = this.value || 'Product Name';
+            });
+            
+            priceInput.addEventListener('input', function() {
+                previewPrice.textContent = '₹' + (this.value || '0.00');
+            });
+            
+            stockInput.addEventListener('input', function() {
+                previewStock.textContent = this.value || '0';
+            });
+            
+            descriptionInput.addEventListener('input', function() {
+                previewDescription.textContent = (this.value.length > 50) 
+                    ? this.value.substring(0, 50) + '...' 
+                    : this.value || 'Product description will appear here...';
+            });
+            
+            categorySelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                previewCategory.textContent = selectedOption.textContent || 'Category';
+            });
+            
+            // Image preview
+            imageInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    previewImage.innerHTML = '🛒';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

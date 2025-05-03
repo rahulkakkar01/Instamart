@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart - Instamart</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f7fff6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Enhanced Navigation Bar Styles */
+        .navbar {
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            overflow: hidden;
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 70px;
+        }
+
+        .navbar-brand {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            text-decoration: none;
+            padding: 14px 0;
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+        }
+        
+        .navbar-brand:before {
+            content: "🛒";
+            margin-right: 10px;
+            font-size: 24px;
+            filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+        }
+
+        .navbar-links {
+            display: flex;
+            height: 100%;
+        }
+
+        .navbar-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            height: 100%;
+            position: relative;
+            transition: all 0.3s;
+            letter-spacing: 0.5px;
+        }
+
+        .navbar-links a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #8eff8e;
+        }
+        
+        .navbar-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: #8eff8e;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        
+        .navbar-links a:hover::after {
+            width: 70%;
+        }
+
+        .navbar-cart {
+            position: relative;
+            cursor: pointer;
+            color: white;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            margin-left: 20px;
+        }
+
+        .cart-count {
+            background-color: #ff9800;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+
+        /* Main content */
+        .main-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-title {
+            color: #2e7d32;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .cart-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        /* Empty cart message */
+        .empty-cart-message {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .empty-cart-icon {
+            font-size: 4rem;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .empty-cart-text {
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .continue-shopping-btn {
+            display: inline-block;
+            background-color: #2e7d32;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .continue-shopping-btn:hover {
+            background-color: #1b5e20;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Cart items table */
+        .cart-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .cart-table th {
+            border-bottom: 2px solid #e0e0e0;
+            text-align: left;
+            padding: 12px 15px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .cart-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 6px;
+            margin-right: 15px;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .product-price {
+            font-weight: 600;
+            color: #4caf50;
+        }
+
+        .item-quantity {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quantity-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .quantity-input {
+            width: 40px;
+            height: 30px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            text-align: center;
+            margin: 0 8px;
+            font-weight: 600;
+        }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #f44336;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+
+        .remove-btn:hover {
+            color: #d32f2f;
+        }
+
+        /* Order summary section */
+        .cart-footer {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .continue-shopping {
+            background: none;
+            border: 2px solid #2e7d32;
+            color: #2e7d32;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .continue-shopping:hover {
+            background-color: #f0f8f0;
+        }
+
+        .order-summary {
+            width: 320px;
+            background: #f8f8f8;
+            border-radius: 6px;
+            padding: 20px;
+        }
+
+        .summary-title {
+            color: #333;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #e0e0e0;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .checkout-btn {
+            display: block;
+            width: 100%;
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            padding: 12px 0;
+            margin-top: 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .checkout-btn:hover {
+            background-color: #1b5e20;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .cart-footer {
+                flex-direction: column;
+            }
+            
+            .order-summary {
+                width: 100%;
+            }
+            
+            .product-image {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .cart-table thead {
+                display: none;
+            }
+            
+            .cart-table tbody tr {
+                display: block;
+                padding: 15px 0;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            
+            .cart-table td {
+                display: block;
+                text-align: right;
+                padding: 8px 0;
+                border: none;
+            }
+            
+            .cart-table td:before {
+                content: attr(data-label);
+                float: left;
+                font-weight: 600;
+                color: #555;
+            }
+            
+            .product-info {
+                justify-content: flex-end;
+            }
+        }
+
+        /* Floating Veggie Emojis Styles */
+        .floating-veggies {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .veggie {
+            position: absolute;
+            font-size: 2.5rem;
+            opacity: 0.3;
+            animation: float 12s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Enhanced Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">Instamart</a>
+            <div class="navbar-links">
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'Insta_Groceries:product_list' %}">Products</a>
+                {% if user.is_authenticated and user.is_staff %}
+                    <a href="{% url 'Insta_Groceries:add_product' %}">
+                        <span class="nav-icon">+</span> Add Product
+                    </a>
+                    <a href="/admin">Admin</a>
+                {% endif %}
+            </div>
+            <div class="navbar-cart">
+                🛒
+                <span class="cart-count" id="cart-count">0</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Floating Veggie Emojis -->
+    <div class="floating-veggies">
+        <div class="veggie" style="left: 10%; animation-delay: 0s;">🍅</div>
+        <div class="veggie" style="left: 25%; animation-delay: 2s;">🥕</div>
+        <div class="veggie" style="left: 40%; animation-delay: 4s;">🥦</div>
+        <div class="veggie" style="left: 60%; animation-delay: 1s;">🧅</div>
+        <div class="veggie" style="left: 80%; animation-delay: 3s;">🌶</div>
+        <div class="veggie" style="left: 15%; animation-delay: 5s;">🍇</div>
+        <div class="veggie" style="left: 70%; animation-delay: 6s;">🍌</div>
+        <div class="veggie" style="left: 35%; animation-delay: 7s;">🥔</div>
+    </div>
+
+    <div class="main-container">
+        <h1 class="page-title">Your Shopping Cart</h1>
+        
+        <div class="cart-container">
+            <!-- Cart content will be dynamically loaded here -->
+            <div id="cart-content"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get cart data from localStorage
+            let cart = JSON.parse(localStorage.getItem('instamart-cart')) || [];
+            const cartCount = document.getElementById('cart-count');
+            const cartContent = document.getElementById('cart-content');
+            
+            // Update cart count
+            function updateCartCount() {
+                const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+                cartCount.textContent = totalItems;
+            }
+            
+            // Render cart content
+            function renderCart() {
+                if (cart.length === 0) {
+                    // Display empty cart message
+                    cartContent.innerHTML = `
+                        <div class="empty-cart-message">
+                            <div class="empty-cart-icon">🛒</div>
+                            <div class="empty-cart-text">Your cart is empty</div>
+                            <a href="{% url 'Insta_Groceries:product_list' %}" class="continue-shopping-btn">
+                                Continue Shopping
+                            </a>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Calculate totals
+                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const shipping = subtotal > 500 ? 0 : 50; // Free shipping over ₹500
+                const total = subtotal + shipping;
+                
+                // Render cart items and summary
+                let html = `
+                    <table class="cart-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                // Add each cart item
+                cart.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    html += `
+                        <tr data-id="${item.id}">
+                            <td data-label="Product">
+                                <div class="product-info">
+                                    <div class="product-image">
+                                        <div style="font-size: 1.8rem;">🛒</div>
+                                    </div>
+                                    <div class="product-name">${item.name}</div>
+                                </div>
+                            </td>
+                            <td data-label="Price" class="product-price">₹${item.price.toFixed(2)}</td>
+                            <td data-label="Quantity">
+                                <div class="item-quantity">
+                                    <button class="quantity-btn decrease-btn">-</button>
+                                    <span class="quantity-input">${item.quantity}</span>
+                                    <button class="quantity-btn increase-btn">+</button>
+                                </div>
+                            </td>
+                            <td data-label="Total" class="product-price">₹${itemTotal.toFixed(2)}</td>
+                            <td>
+                                <button class="remove-btn">✕</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                        </tbody>
+                    </table>
+                    
+                    <div class="cart-footer">
+                        <a href="{% url 'Insta_Groceries:product_list' %}" class="continue-shopping">
+                            ← Continue Shopping
+                        </a>
+                        
+                        <div class="order-summary">
+                            <h3 class="summary-title">Order Summary</h3>
+                            <div class="summary-line">
+                                <span>Subtotal</span>
+                                <span>₹${subtotal.toFixed(2)}</span>
+                            </div>
+                            <div class="summary-line">
+                                <span>Shipping</span>
+                                <span>${shipping === 0 ? 'Free' : '₹' + shipping.toFixed(2)}</span>
+                            </div>
+                            <div class="summary-total">
+                                <span>Total</span>
+                                <span>₹${total.toFixed(2)}</span>
+                            </div>
+                            <a href="#" class="checkout-btn">Proceed to Checkout</a>
+                        </div>
+                    </div>
+                `;
+                
+                cartContent.innerHTML = html;
+                
+                // Add event listeners to buttons
+                document.querySelectorAll('.decrease-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const row = this.closest('tr');
+                        const id = row.getAttribute('data-id');
+                        updateItemQuantity(id, -1);
+                    });
+                });
+                
+                document.querySelectorAll('.increase-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const row = this.closest('tr');
+                        const id = row.getAttribute('data-id');
+                        updateItemQuantity(id, 1);
+                    });
+                });
+                
+                document.querySelectorAll('.remove-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const row = this.closest('tr');
+                        const id = row.getAttribute('data-id');
+                        removeItem(id);
+                    });
+                });
+            }
+            
+            // Update item quantity
+            function updateItemQuantity(id, change) {
+                const item = cart.find(item => item.id === id);
+                
+                if (item) {
+                    item.quantity += change;
+                    
+                    if (item.quantity <= 0) {
+                        // Remove item if quantity is zero or less
+                        cart = cart.filter(item => item.id !== id);
+                    }
+                    
+                    // Save to localStorage
+                    localStorage.setItem('instamart-cart', JSON.stringify(cart));
+                    
+                    // Update UI
+                    updateCartCount();
+                    renderCart();
+                }
+            }
+            
+            // Remove item from cart
+            function removeItem(id) {
+                cart = cart.filter(item => item.id !== id);
+                
+                // Save to localStorage
+                localStorage.setItem('instamart-cart', JSON.stringify(cart));
+                
+                // Update UI
+                updateCartCount();
+                renderCart();
+            }
+            
+            // Initialize
+            updateCartCount();
+            renderCart();
+        });
+    </script>
+</body>
+</html>

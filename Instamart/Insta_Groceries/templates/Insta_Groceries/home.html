@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insta Groceries</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f7fff6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Enhanced Navigation Bar Styles */
+        .navbar {
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            overflow: visible; /* Changed from hidden to visible to allow dropdowns */
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 70px;
+        }
+
+        .navbar-brand {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            text-decoration: none;
+            padding: 14px 0;
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+        }
+        
+        .navbar-brand:before {
+            content: "🛒";
+            margin-right: 10px;
+            font-size: 24px;
+            filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+        }
+
+        .navbar-links {
+            display: flex;
+            height: 100%;
+        }
+
+        .navbar-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            height: 100%;
+            z-index: 1001;
+            position: relative;
+            transition: all 0.3s;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .navbar-links a:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: #8eff8e;
+        }
+        
+        .navbar-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: #8eff8e;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+            box-shadow: 0 0 5px rgba(142, 255, 142, 0.5);
+        }
+        
+        .navbar-links a:hover::after {
+            width: 70%;
+        }
+        
+        .navbar-cart {
+            display: flex;
+            align-items: center;
+            color: white;
+            margin-left: 15px;
+            cursor: pointer;
+            z-index: 1002; /* Increased z-index */
+            font-size: 20px;
+            position: relative;
+            filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.2));
+            transition: transform 0.2s;
+        }
+        
+        .navbar-cart:hover {
+            transform: scale(1.1);
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #ff5252;
+            color: white;
+            font-size: 12px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 5px 15px;
+            margin-right: 10px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .search-box:focus-within {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        }
+        
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            outline: none;
+            width: 120px;
+            transition: width 0.3s;
+        }
+        
+        .search-box:focus-within input {
+            width: 150px;
+        }
+        
+        .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .search-icon {
+            color: white;
+            margin-right: 5px;
+        }
+
+        /* Floating Veggie Emojis Styles */
+        /* Update these styles to fix the veggies animation */
+.floating-veggies {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;  /* Keep this negative to be behind content */
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.veggie {
+    position: absolute;
+    font-size: 2.5rem;
+    opacity: 0.3;
+    animation: float 15s infinite linear;
+    /* Start from bottom of screen - add this */
+    bottom: -50px;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.3;
+    }
+    100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+        .content {
+            padding: 20px;
+            margin-top: 20px;
+            position: relative;
+            z-index: 1; /* Ensure content is above floating veggies */
+        }
+
+        h1 {
+            text-align: center;
+            color: #2e7d32;
+            margin-top: 30px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Cardboard Box Styled Product Cards */
+        .product-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            position: relative;
+            z-index: 1; /* Ensure product container is above floating veggies */
+        }
+        
+        .product-card {
+            width: 280px;
+            background-color: #e8d0a9;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        /* Cardboard texture */
+        .product-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, 
+                rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent),
+                linear-gradient(135deg, #d9c097, #e8d0a9);
+            background-size: 20px 20px, 100% 100%;
+            z-index: -1;
+            opacity: 0.8;
+        }
+        
+        /* Box top flap */
+        .product-card::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 15px;
+            background-color: #d4bc91;
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+        }
+        
+        .product-content {
+            padding: 25px 15px 15px;
+            position: relative;
+        }
+        
+        /* Tape effect */
+        .product-content::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 15px;
+            background-color: rgba(173, 181, 189, 0.6);
+            z-index: 1;
+        }
+        
+        .product-card h3 {
+            color: #4e3114;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px dashed #c4a87a;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        
+        .product-details {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 5px 10px;
+            color: #5d4520;
+        }
+        
+        .product-label {
+            font-weight: bold;
+        }
+        
+        .product-category {
+            grid-column: span 2;
+            text-align: center;
+            margin-top: 10px;
+            background-color: #d4bc91;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 150px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            background-color: #f5f5f5;
+            position: relative;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+
+        .product-image.placeholder {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #e0e0e0;
+        }
+
+        .no-image {
+            font-size: 3rem;
+            color: #aaa;
+        }
+
+        .categories-section {
+            margin: 20px auto;
+            width: 80%;
+            max-width: 800px;
+        }
+
+        .categories-title {
+            color: #2e7d32;
+            border-bottom: 2px solid #2e7d32;
+            padding-bottom: 10px;
+        }
+
+        .category-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .category-link {
+            background-color: #e8f5e9;
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: #2e7d32;
+            font-weight: 500;
+            transition: background-color 0.2s, transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .category-link:hover {
+            background-color: #c8e6c9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Trust Section Styles */
+        .trust-section {
+            background-color: #f7fff6;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+            z-index: 1; /* Ensure trust section is above floating veggies */
+        }
+
+        .section-container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .section-title {
+            color: #2e7d32;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .trust-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+            background-color: #e8f5e9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .stat-label {
+            color: #5d4520;
+        }
+
+        .review-carousel {
+            margin-bottom: 40px;
+        }
+
+        .review-container {
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .review-card {
+            flex: 0 0 100%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .review-card.active {
+            opacity: 1;
+        }
+
+        .review-content {
+            background-color: #e8f5e9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .review-stars {
+            color: #ffcc00;
+            margin-bottom: 10px;
+        }
+
+        .review-text {
+            color: #5d4520;
+            margin-bottom: 20px;
+        }
+
+        .reviewer {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .reviewer-avatar {
+            font-size: 2rem;
+        }
+
+        .reviewer-info {
+            text-align: left;
+        }
+
+        .reviewer-name {
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .reviewer-location {
+            color: #5d4520;
+        }
+
+        .review-navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .review-nav-btn {
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .review-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .review-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .review-dot.active {
+            background-color: #2e7d32;
+        }
+
+        .trust-badges {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .badge {
+            text-align: center;
+            background-color: #e8f5e9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .badge-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .badge-text {
+            color: #5d4520;
+        }
+
+        .add-to-cart-btn {
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-to-cart-btn:hover {
+            background-color: #1b5e20;
+        }
+
+        .cart-icon {
+            font-size: 1.2rem;
+        }
+
+        /* Cart dropdown styles */
+        .cart-contents {
+            /* Base styles */
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            min-width: 300px;
+            z-index: 1005; /* Increased z-index */
+        }
+
+        .cart-contents.show {
+            display: block;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .cart-item-price {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+        }
+
+        .quantity-btn {
+            background: #f0f0f0;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .quantity-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .cart-item-quantity span {
+            margin: 0 10px;
+        }
+
+        .view-cart-btn {
+            display: block;
+            text-align: center;
+            background-color: #607d8b;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .view-cart-btn:hover {
+            background-color: #455a64;
+        }
+
+        /* Add this to your CSS styles */
+        .cart-link {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            position: relative;
+            font-size: 20px;
+            cursor: pointer;
+            filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.2));
+            transition: transform 0.2s;
+        }
+
+        .cart-link:hover {
+            transform: scale(1.1);
+        }
+
+        .navbar-cart {
+            margin-left: 15px;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            position: relative;
+            z-index: 1002; /* Increased z-index */
+        }
+
+        .auth-links {
+            display: flex;
+            margin-right: 15px;
+        }
+
+        .auth-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-left: 8px;
+        }
+
+        .auth-link:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .signup-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .signup-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .user-menu {
+            position: relative;
+            margin-right: 15px;
+            z-index: 1003; /* Increased z-index */
+        }
+
+        .user-menu-toggle {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .user-menu-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            min-width: 150px;
+            display: none;
+            z-index: 1004; /* Increased z-index */
+        }
+
+        .user-menu:hover .user-dropdown {
+            display: block;
+        }
+
+        .user-dropdown a {
+            display: block;
+            padding: 10px 15px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .user-dropdown a:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* Add notification styles */
+        .cart-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 1010; /* Very high z-index */
+        }
+
+        .cart-notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-icon {
+            font-size: 1.2rem;
+        }
+    </style> 
+</head>
+<body>
+    <!-- Floating Veggie Emojis -->
+    <div class="floating-veggies">
+        <div class="veggie" style="left: 10%; animation-delay: 0s;">🍅</div>
+        <div class="veggie" style="left: 25%; animation-delay: 2s;">🥕</div>
+        <div class="veggie" style="left: 40%; animation-delay: 4s;">🥦</div>
+        <div class="veggie" style="left: 60%; animation-delay: 1s;">🧅</div>
+        <div class="veggie" style="left: 80%; animation-delay: 3s;">🌶</div>
+        <div class="veggie" style="left: 15%; animation-delay: 5s;">🍇</div>
+        <div class="veggie" style="left: 70%; animation-delay: 6s;">🍌</div>
+        <div class="veggie" style="left: 35%; animation-delay: 7s;">🥔</div>
+        <div class="veggie" style="left: 50%; animation-delay: 8s;">🍆</div>
+        <div class="veggie" style="left: 90%; animation-delay: 9s;">🥑</div>
+        <div class="veggie" style="left: 5%; animation-delay: 10s;">🍊</div>
+    </div>
+    
+    <!-- Navigation Bar - FIXED: Removed duplicate navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">Instamart</a>
+            <div class="navbar-links">
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'Insta_Groceries:product_list' %}">Products</a>
+                {% if user.is_authenticated and user.is_staff %}
+                    <a href="{% url 'Insta_Groceries:add_product' %}">
+                        <span class="nav-icon">+</span> Add Product
+                    </a>
+                    <a href="/admin">Admin</a>
+                {% endif %}
+            </div>
+            <div class="navbar-right">
+                {% if user.is_authenticated %}
+                    <div class="user-menu">
+                        <a href="#" class="user-menu-toggle">
+                            👤 {{ user.username }}
+                        </a>
+                        <div class="user-dropdown">
+                           
+                            <a href="{% url 'accounts:logout' %}">Logout</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="auth-links">
+                        <a href="{% url 'accounts:signin' %}" class="auth-link">Sign In</a>
+                        <a href="{% url 'accounts:signup' %}" class="auth-link signup-btn">Sign Up</a>
+                    </div>
+                {% endif %}
+                <div class="navbar-cart">
+                    <a href="{% url 'Insta_Groceries:cart_page' %}" class="cart-link">
+                        🛒
+                        <span class="cart-count">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Reviews and Trust Indicators -->
+    <section class="trust-section">
+        <div class="section-container">
+            <h2 class="section-title">Why People Love Instamart</h2>
+            
+            <!-- Trust Stats -->
+            <div class="trust-stats">
+                <div class="stat-item">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-number">4.8</div>
+                    <div class="stat-label">Average Rating</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">🚚</div>
+                    <div class="stat-number">10K+</div>
+                    <div class="stat-label">Deliveries</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">👨‍👩‍👧‍👦</div>
+                    <div class="stat-number">5K+</div>
+                    <div class="stat-label">Happy Customers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">🥦</div>
+                    <div class="stat-number">100+</div>
+                    <div class="stat-label">Products</div>
+                </div>
+            </div>
+            
+            <!-- Customer Reviews Carousel -->
+            <div class="review-carousel">
+                <div class="review-container">
+                    <div class="review-card active">
+                        <div class="review-content">
+                            <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                            <p class="review-text">"Instamart has transformed how I shop for groceries! The fruits and vegetables are always fresh, and delivery is super quick. I've been a loyal customer for over a year now."</p>
+                            <div class="reviewer">
+                                <div class="reviewer-avatar">👩</div>
+                                <div class="reviewer-info">
+                                    <div class="reviewer-name">Priya Sharma</div>
+                                    <div class="reviewer-location">Delhi</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-content">
+                            <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                            <p class="review-text">"The ease of ordering and quality of products are exceptional. Their organic vegetables section is my favorite - everything is fresh and tastier than what I find at local markets."</p>
+                            <div class="reviewer">
+                                <div class="reviewer-avatar">👨</div>
+                                <div class="reviewer-info">
+                                    <div class="reviewer-name">Rahul Mehta</div>
+                                    <div class="reviewer-location">Mumbai</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-content">
+                            <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                            <p class="review-text">"As a busy working mom, Instamart saves me so much time. Their app is easy to use, prices are reasonable, and their customer service is outstanding. I highly recommend them!"</p>
+                            <div class="reviewer">
+                                <div class="reviewer-avatar">👩</div>
+                                <div class="reviewer-info">
+                                    <div class="reviewer-name">Anjali Patel</div>
+                                    <div class="reviewer-location">Bangalore</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="review-navigation">
+                    <button class="review-nav-btn prev-btn">❮</button>
+                    <div class="review-dots">
+                        <span class="review-dot active" data-index="0"></span>
+                        <span class="review-dot" data-index="1"></span>
+                        <span class="review-dot" data-index="2"></span>
+                    </div>
+                    <button class="review-nav-btn next-btn">❯</button>
+                </div>
+            </div>
+            
+            <div class="content">
+                <!-- Categories Section -->
+                <div class="categories-section">
+                    <h2 class="categories-title">Shop by Category</h2>
+                    <div class="category-links">
+                        {% if categories %}
+                            Categories count: {{ categories|length }}  <!-- Debug line -->
+                            {% for category in categories %}
+                                <a href="{% url 'Insta_Groceries:product_list' %}?category={{ category.id }}" class="category-link">{{ category.name }}</a>
+                            {% endfor %}
+                        {% else %}
+                            <p>No categories available. Please add some categories first.</p>
+                        {% endif %}
+                    </div>
+                </div>
+        
+                <!-- Product Display -->
+                <h1>Available Products</h1>
+                
+                <div class="product-container">
+                    {% for pro in prod %}
+                    <div class="product-card">
+                        <div class="product-content">
+                            {% if pro.image %}
+                                <div class="product-image">
+                                    <img src="{{ pro.image.url }}" alt="{{ pro.product_name }}">
+                                </div>
+                            {% else %}
+                                <div class="product-image placeholder">
+                                    <div class="no-image">🛒</div>
+                                </div>
+                            {% endif %}
+                            <h3>{{ pro.product_name }}</h3>
+                            <div class="product-details">
+                                <div class="product-label">Price:</div>
+                                <div>₹{{ pro.price }}</div>
+                                
+                                <div class="product-label">Stock:</div>
+                                <div>{{ pro.stock }}</div>
+                                
+                                <div class="product-label">Description:</div>
+                                <div>{{ pro.description|truncatechars:50 }}</div>
+                                
+                                {% if pro.category %}
+                                <div class="product-category">{{ pro.category.name }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Add to Cart Button -->
+                            <button class="add-to-cart-btn" data-product-id="{{ pro.id }}" data-product-name="{{ pro.product_name }}" data-product-price="{{ pro.price }}">
+                                Add to Cart <span class="cart-icon">🛒</span>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Trust Badges -->
+            <div class="trust-badges">
+                <div class="badge">
+                    <div class="badge-icon">🛡️</div>
+                    <div class="badge-text">Secure Payment</div>
+                </div>
+                <div class="badge">
+                    <div class="badge-icon">🌱</div>
+                    <div class="badge-text">Organic Options</div>
+                </div>
+                <div class="badge">
+                    <div class="badge-icon">⚡</div>
+                    <div class="badge-text">Express Delivery</div>
+                </div>
+                <div class="badge">
+                    <div class="badge-icon">♻️</div>
+                    <div class="badge-text">Eco Packaging</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cool Dark Footer -->
+    <footer style="background-color: #121212; color: #eee; padding: 40px 20px 20px;">
+        <div style="max-width: 1200px; margin: auto; display: flex; flex-wrap: wrap; justify-content: space-between;">
+            
+            <!-- Brand Info -->
+            <div style="flex: 1 1 200px; margin-bottom: 20px;">
+                <h2 style="color: #fff;">Instamart</h2>
+                <p style="color: #aaa;">© 2025 Instamart Pvt. Ltd</p>
+            </div>
+
+            <!-- Categories -->
+            <div style="flex: 1 1 180px; margin-bottom: 20px;">
+                <h4 style="color: #fff;">Categories</h4>
+                <ul style="list-style: none; padding: 0;">
+                    {% for category in categories|slice:":5" %}
+                        <li><a href="{% url 'Insta_Groceries:product_list' %}?category={{ category.id }}" style="color: #aaa; text-decoration: none;">{{ category.name }}</a></li>
+                    {% endfor %}
+                    <li><button style="margin-top:10px; background: transparent; border: 1px solid #555; color: #aaa; border-radius: 5px; padding: 5px 10px;">View All</button></li>
+                </ul>
+            </div>
+
+            <!-- Quick Links -->
+            <div style="flex: 1 1 180px; margin-bottom: 20px;">
+                <h4 style="color: #fff;">Quick Links</h4>
+                <ul style="list-style: none; padding: 0;">
+                    <li><a href="/" style="color: #aaa; text-decoration: none;">Home</a></li>
+                    <li><a href="/admin" style="color: #aaa; text-decoration: none;">Admin</a></li>
+                    <li><a href="#" style="color: #aaa; text-decoration: none;">Contact</a></li>
+                </ul>
+            </div>
+
+            <!-- Socials -->
+            <div style="flex: 1 1 180px; margin-bottom: 20px;">
+                <h4 style="color: #fff;">Connect</h4>
+                <div style="display: flex; gap: 15px; font-size: 1.5rem;">
+                    <a href="#" style="color: #aaa;"><i class="fab fa-facebook"></i>📘</a>
+                    <a href="#" style="color: #aaa;"><i class="fab fa-instagram"></i>📸</a>
+                    <a href="#" style="color: #aaa;"><i class="fab fa-twitter"></i>🐦</a>
+                </div>
+            </div>
+        </div>
+        <p style="text-align: center; color: #555; margin-top: 30px;">© 2025 Instamart — All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Review carousel functionality
+            const reviewCards = document.querySelectorAll('.review-card');
+            const dots = document.querySelectorAll('.review-dot');
+            const prevBtn = document.querySelector('.prev-btn');
+            const nextBtn = document.querySelector('.next-btn');
+            let currentIndex = 0;
+            
+            function showReview(index) {
+                // Remove active class from all reviews and dots
+                reviewCards.forEach(card => card.classList.remove('active'));
+                dots.forEach(dot => dot.classList.remove('active'));
+                
+                // Set current index within bounds
+                if (index < 0) index = reviewCards.length - 1;
+                if (index >= reviewCards.length) index = 0;
+                currentIndex = index;
+                
+                // Add active class to current review and dot
+                reviewCards[currentIndex].classList.add('active');
+                dots[currentIndex].classList.add('active');
+            }
+            
+            // Event listeners for navigation
+            if(dots.length > 0) {
+                dots.forEach(dot => {
+                    dot.addEventListener('click', function() {
+                        showReview(parseInt(this.getAttribute('data-index')));
+                    });
+                });
+            }
+            
+            if(prevBtn) {
+                prevBtn.addEventListener('click', function() {
+                    showReview(currentIndex - 1);
+                });
+            }
+            
+            if(nextBtn) {
+                nextBtn.addEventListener('click', function() {
+                    showReview(currentIndex + 1);
+                });
+            }
+            
+            // Auto-rotate reviews every 5 seconds if reviews exist
+            if(reviewCards.length > 0) {
+                setInterval(() => {
+                    showReview(currentIndex + 1);
+                }, 5000);
+            }
+            
+            // Shopping Cart Functionality
+            let cart = JSON.parse(localStorage.getItem('instamart-cart')) || [];
+            const cartIcon = document.getElementById('cart-icon');
+            const cartContents = document.getElementById('cart-contents');
+            const cartCount = document.querySelector('.cart-count');
+            
+            // Update cart count
+            function updateCartCount() {
+                const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+                cartCount.textContent = totalItems;
+            }
+            
+            // Create notification
+            function showNotification(productName) {
+                // Remove any existing notification
+                const existingNotification = document.querySelector('.cart-notification');
+                if (existingNotification) {
+                    existingNotification.remove();
+                }
+                
+                // Create new notification
+                const notification = document.createElement('div');
+                notification.className = 'cart-notification';
+                notification.innerHTML = `
+                    <span class="notification-icon">✅</span>
+                    <span>${productName} added to cart</span>
+                `;
+                
+                // Add to document
+                document.body.appendChild(notification);
+                
+                // Show notification
+                setTimeout(() => notification.classList.add('show'), 10);
+                
+                // Hide notification after 3 seconds
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+            
+            // Add to cart functionality for all buttons
+            const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+            addToCartButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-product-id');
+                    const productName = this.getAttribute('data-product-name');
+                    const productPrice = parseFloat(this.getAttribute('data-product-price'));
+                    
+                    // Find if product already in cart
+                    const existingProduct = cart.find(item => item.id === productId);
+                    
+                    if (existingProduct) {
+                        existingProduct.quantity += 1;
+                    } else {
+                        cart.push({
+                            id: productId,
+                            name: productName,
+                            price: productPrice,
+                            quantity: 1
+                        });
+                    }
+                    
+                    // Save cart to localStorage
+                    localStorage.setItem('instamart-cart', JSON.stringify(cart));
+                    
+                    // Update UI
+                    updateCartCount();
+                    updateCartContents();
+                    
+                    // Show notification
+                    showNotification(productName);
+                });
+            });
+            
+            // Update cart contents
+            function updateCartContents() {
+                const cartItems = document.getElementById('cart-items');
+                
+                if (cartItems) {
+                    if (cart.length === 0) {
+                        cartItems.innerHTML = '<div class="empty-cart">Your cart is empty</div>';
+                        document.getElementById('cart-total').textContent = '₹0.00';
+                        return;
+                    }
+                    
+                    // Calculate total
+                    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                    
+                    // Populate cart items
+                    let html = '';
+                    cart.forEach(item => {
+                        html += `
+                            <div class="cart-item">
+                                <div class="cart-item-details">
+                                    <span class="cart-item-name">${item.name}</span>
+                                    <span class="cart-item-price">₹${item.price}</span>
+                                </div>
+                                <div class="cart-item-quantity">
+                                    <button class="quantity-btn minus" data-id="${item.id}">-</button>
+                                    <span>${item.quantity}</span>
+                                    <button class="quantity-btn plus" data-id="${item.id}">+</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    cartItems.innerHTML = html;
+                    document.getElementById('cart-total').textContent = `₹${total.toFixed(2)}`;
+                    
+                    // Add event listeners for quantity buttons
+                    document.querySelectorAll('.quantity-btn.minus').forEach(btn => {
+                        btn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            const id = this.getAttribute('data-id');
+                            const item = cart.find(item => item.id === id);
+                            
+                            if (item.quantity > 1) {
+                                item.quantity -= 1;
+                            } else {
+                                cart = cart.filter(item => item.id !== id);
+                            }
+                            
+                            localStorage.setItem('instamart-cart', JSON.stringify(cart));
+                            updateCartCount();
+                            updateCartContents();
+                        });
+                    });
+                    
+                    document.querySelectorAll('.quantity-btn.plus').forEach(btn => {
+                        btn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            const id = this.getAttribute('data-id');
+                            const item = cart.find(item => item.id === id);
+                            item.quantity += 1;
+                            
+                            localStorage.setItem('instamart-cart', JSON.stringify(cart));
+                            updateCartCount();
+                            updateCartContents();
+                        });
+                    });
+                }
+            }
+            
+            // Initialize cart count and contents
+            updateCartCount();
+            updateCartContents();
+        });
+    </script>
+</body>
+</html>
